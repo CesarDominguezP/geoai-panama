@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GeoAI - Panamá Oeste</title>
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <style>
+        /* Hacemos que el mapa ocupe toda la pantalla */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        #map {
+            height: 100vh;
+            width: 100%;
+        }
+
+        /* Un panel flotante para los resultados */
+        .info-panel {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            max-width: 300px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="info-panel">
+        <h3>Explorador GeoAI</h3>
+        <p id="status">Haz clic en el mapa para analizar el terreno en Panamá Oeste.</p>
+        <div id="coordenadas"></div>
+    </div>
+
+    <div id="map"></div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <script>
+        // 3. Inicializamos el mapa centrado en Altos de Campana
+        // Coordenadas aproximadas: [Latitud, Longitud]
+        const map = L.map('map').setView([8.6833, -79.9167], 13);
+
+        // 4. Añadimos la capa visual (OpenStreetMap)
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap'
+        }).addTo(map);
+
+        // 5. Función que se ejecuta al hacer clic
+        map.on('click', function (e) {
+            const lat = e.latlng.lat.toFixed(5);
+            const lng = e.latlng.lng.toFixed(5);
+
+            // Actualizamos el panel
+            document.getElementById('status').innerText = "Enviando coordenadas al motor de IA...";
+            document.getElementById('coordenadas').innerHTML = `<strong>Lat:</strong> ${lat} <br> <strong>Lng:</strong> ${lng}`;
+
+            // Ponemos un marcador donde el usuario hizo clic
+            L.marker([lat, lng]).addTo(map)
+                .bindPopup("Punto de análisis enviado.")
+                .openPopup();
+        });
+    </script>
+</body>
+
+</html>
