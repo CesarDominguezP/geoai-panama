@@ -41,7 +41,7 @@
     <div class="info-panel">
         <h3>Explorador GeoAI</h3>
         <p id="status">Haz clic en el mapa para analizar el terreno en Panamá Oeste.</p>
-        <div id="coordenadas"></div>
+        
     </div>
 
     <div id="map"></div>
@@ -49,28 +49,42 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <script>
-        // 3. Inicializamos el mapa centrado en Altos de Campana
-        // Coordenadas aproximadas: [Latitud, Longitud]
+        // MANTENEMOS: La configuración del mapa
         const map = L.map('map').setView([8.6833, -79.9167], 13);
 
-        // 4. Añadimos la capa visual (OpenStreetMap)
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap'
         }).addTo(map);
 
-        // 5. Función que se ejecuta al hacer clic
-        map.on('click', function (e) {
+        // REEMPLAZAMOS: El evento de clic por la nueva versión conectada a Python
+        map.on('click', function(e) {
             const lat = e.latlng.lat.toFixed(5);
             const lng = e.latlng.lng.toFixed(5);
 
-            // Actualizamos el panel
-            document.getElementById('status').innerText = "Enviando coordenadas al motor de IA...";
-            document.getElementById('coordenadas').innerHTML = `<strong>Lat:</strong> ${lat} <br> <strong>Lng:</strong> ${lng}`;
+            document.getElementById('status').innerText = "Solicitando blindaje digital...";
 
-            // Ponemos un marcador donde el usuario hizo clic
-            L.marker([lat, lng]).addTo(map)
-                .bindPopup("Punto de análisis enviado.")
-                .openPopup();
+            // Llamada al servidor Python (El "Puente")
+            fetch('http://127.0.0.1:5000/analizar', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ lat: lat, lng: lng })
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Actualizamos el panel con la respuesta del servidor
+                document.getElementById('status').innerHTML = `
+                    <strong>Resultado:</strong> ${data.resultado}<br>
+                    <strong>Firma SHA-256:</strong> <small style="word-break: break-all;">${data.hash}</small>
+                `;
+                
+                L.marker([lat, lng]).addTo(map)
+                    .bindPopup(`Integridad validada: ${data.hash.substring(0,10)}...`)
+                    .openPopup();
+            })
+            .catch(err => {
+                console.error('Error de conexión:', err);
+                document.getElementById('status').innerText = "Error: ¿El servidor Python está encendido?";
+            });
         });
     </script>
 </body>
