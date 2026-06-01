@@ -1,0 +1,309 @@
+/* ============================================================
+   SATE-CSS-02 | LAYOUT PRINCIPAL
+   Estructura: header + sidebar + mapa + panel resultados.
+   Dependencias: theme.css
+   SATE v2.0 | JIC 2026
+   ============================================================ */
+
+/* ── Header ── */
+.sate-header {
+  position:         fixed;
+  top:              0;
+  left:             0;
+  right:            0;
+  height:           48px;
+  z-index:          var(--z-header);
+  background:       var(--color-bg-surface);
+  border-bottom:    1px solid var(--color-border);
+  display:          flex;
+  align-items:      center;
+  justify-content:  space-between;
+  padding:          0 var(--space-4);
+  gap:              var(--space-4);
+}
+
+.sate-header__brand {
+  display:    flex;
+  align-items: baseline;
+  gap:         var(--space-2);
+}
+
+.sate-header__logo {
+  font-family:  var(--font-mono);
+  font-size:    var(--text-lg);
+  font-weight:  700;
+  color:        var(--color-primary-light);
+  letter-spacing: 0.1em;
+}
+
+.sate-header__version {
+  font-family: var(--font-mono);
+  font-size:   var(--text-xs);
+  color:       var(--color-text-muted);
+}
+
+.sate-header__tagline {
+  font-size:  var(--text-sm);
+  color:      var(--color-text-muted);
+}
+
+.sate-header__meta {
+  display:    flex;
+  align-items: center;
+  gap:         var(--space-4);
+}
+
+.sate-header__coords {
+  font-family: var(--font-mono);
+  font-size:   var(--text-xs);
+  color:       var(--color-text-muted);
+}
+
+.sate-header__flag {
+  font-size: var(--text-sm);
+}
+
+/* ── Layout principal ── */
+.sate-main {
+  display:    flex;
+  height:     100vh;
+  padding-top: 48px;   /* altura del header */
+}
+
+/* ── Sidebar ── */
+.sate-sidebar {
+  width:        320px;
+  min-width:    320px;
+  height:       100%;
+  z-index:      var(--z-sidebar);
+  background:   var(--color-bg-surface);
+  border-right: 1px solid var(--color-border);
+  display:      flex;
+  flex-direction: column;
+  overflow:     hidden;
+}
+
+/* ── Tabs ── */
+.sate-tabs {
+  display:          grid;
+  grid-template-columns: repeat(4, 1fr);
+  border-bottom:    1px solid var(--color-border);
+  flex-shrink:      0;
+}
+
+.sate-tab {
+  display:        flex;
+  flex-direction: column;
+  align-items:    center;
+  justify-content: center;
+  gap:            var(--space-1);
+  padding:        var(--space-2) var(--space-1);
+  background:     none;
+  border:         none;
+  border-bottom:  2px solid transparent;
+  color:          var(--color-text-muted);
+  cursor:         pointer;
+  transition:     color var(--transition-fast), border-color var(--transition-fast);
+  font-family:    var(--font-body);
+  font-size:      var(--text-xs);
+}
+
+.sate-tab:hover {
+  color: var(--color-text);
+}
+
+.sate-tab--active {
+  color:         var(--color-primary-light);
+  border-bottom-color: var(--color-primary);
+}
+
+.sate-tab__icon {
+  font-size: var(--text-lg);
+  line-height: 1;
+}
+
+/* ── Panels ── */
+.sate-panel {
+  flex: 1;
+  overflow-y: auto;
+  padding:    var(--space-4);
+  display:    flex;
+  flex-direction: column;
+  gap:        var(--space-4);
+}
+
+.sate-panel--hidden {
+  display: none !important;
+}
+
+.sate-panel__title {
+  font-family:  var(--font-display);
+  font-size:    var(--text-lg);
+  font-weight:  300;
+  color:        var(--color-text);
+  padding-bottom: var(--space-2);
+  border-bottom:  1px solid var(--color-border);
+}
+
+/* ── Contenedor del mapa ── */
+.sate-map-container {
+  flex:     1;
+  position: relative;
+  overflow: hidden;
+}
+
+#map {
+  width:  100%;
+  height: 100%;
+}
+
+/* ── Panel de resultados (derecha) ── */
+.sate-results-panel {
+  width:          340px;
+  min-width:      340px;
+  height:         100%;
+  background:     var(--color-bg-surface);
+  border-left:    1px solid var(--color-border);
+  display:        flex;
+  flex-direction: column;
+  overflow:       hidden;
+  z-index:        var(--z-sidebar);
+}
+
+.sate-results-panel__header {
+  display:         flex;
+  align-items:     center;
+  justify-content: space-between;
+  padding:         var(--space-4);
+  border-bottom:   1px solid var(--color-border);
+  flex-shrink:     0;
+}
+
+.sate-results-panel__header h2 {
+  font-family: var(--font-display);
+  font-size:   var(--text-lg);
+  font-weight: 300;
+}
+
+.sate-results-panel__header button {
+  background: none;
+  border:     none;
+  color:      var(--color-text-muted);
+  cursor:     pointer;
+  font-size:  var(--text-lg);
+  padding:    var(--space-1);
+  transition: color var(--transition-fast);
+}
+
+.sate-results-panel__header button:hover {
+  color: var(--color-text);
+}
+
+#results-content {
+  flex:       1;
+  overflow-y: auto;
+  padding:    var(--space-4);
+}
+
+.sate-results-panel__actions {
+  padding:      var(--space-4);
+  border-top:   1px solid var(--color-border);
+  flex-shrink:  0;
+}
+
+/* ── FAB Roadmap ── */
+.sate-fab {
+  position:   fixed;
+  bottom:     var(--space-5);
+  right:      var(--space-5);
+  z-index:    var(--z-controls);
+  background: var(--color-bg-surface);
+  border:     1px solid var(--color-border);
+  color:      var(--color-text-muted);
+  padding:    var(--space-2) var(--space-4);
+  border-radius: var(--radius-xl);
+  cursor:     pointer;
+  font-family: var(--font-mono);
+  font-size:  var(--text-xs);
+  transition: all var(--transition-fast);
+  box-shadow: var(--shadow-md);
+}
+
+.sate-fab:hover {
+  border-color: var(--color-primary);
+  color:        var(--color-primary-light);
+  box-shadow:   var(--shadow-glow);
+}
+
+/* ── Modales ── */
+.sate-modal {
+  position:       fixed;
+  inset:          0;
+  z-index:        var(--z-modal);
+  display:        flex;
+  align-items:    center;
+  justify-content: center;
+}
+
+.sate-modal__backdrop {
+  position:   absolute;
+  inset:      0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+}
+
+.sate-modal__content {
+  position:   relative;
+  z-index:    1;
+  background: var(--color-bg-surface);
+  border:     1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  width:      min(600px, 95vw);
+  max-height: 90vh;
+  display:    flex;
+  flex-direction: column;
+  box-shadow: var(--shadow-lg);
+}
+
+.sate-modal__content--wide {
+  width: min(800px, 95vw);
+}
+
+.sate-modal__header {
+  display:         flex;
+  align-items:     center;
+  justify-content: space-between;
+  padding:         var(--space-4) var(--space-6);
+  border-bottom:   1px solid var(--color-border);
+  flex-shrink:     0;
+}
+
+.sate-modal__header h2 {
+  font-family: var(--font-display);
+  font-size:   var(--text-xl);
+  font-weight: 300;
+}
+
+.sate-modal__header button {
+  background: none;
+  border:     none;
+  color:      var(--color-text-muted);
+  cursor:     pointer;
+  font-size:  var(--text-xl);
+  padding:    var(--space-1);
+}
+
+.sate-modal__footer {
+  display:         flex;
+  justify-content: flex-end;
+  gap:             var(--space-3);
+  padding:         var(--space-4) var(--space-6);
+  border-top:      1px solid var(--color-border);
+  flex-shrink:     0;
+}
+
+#pdf-preview {
+  flex:       1;
+  overflow-y: auto;
+  padding:    var(--space-6);
+}

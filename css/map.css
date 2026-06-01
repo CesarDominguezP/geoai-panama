@@ -1,0 +1,122 @@
+/* ============================================================
+   SATE-CSS-03 | ESTILOS DEL MAPA
+   Overrides de Leaflet y controles flotantes sobre el mapa.
+   Dependencias: theme.css
+   SATE v2.0 | JIC 2026
+   ============================================================ */
+
+/* ── Controles flotantes ── */
+.sate-map-controls {
+  position:   absolute;
+  top:        var(--space-4);
+  right:      var(--space-4);
+  z-index:    var(--z-controls);
+  display:    flex;
+  flex-direction: column;
+  gap:        var(--space-2);
+}
+
+.sate-map-btn {
+  width:      36px;
+  height:     36px;
+  background: var(--color-bg-surface);
+  border:     1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color:      var(--color-text-muted);
+  cursor:     pointer;
+  font-size:  var(--text-base);
+  display:    flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+  box-shadow: var(--shadow-sm);
+}
+
+.sate-map-btn:hover {
+  border-color: var(--color-primary);
+  color:        var(--color-primary-light);
+  box-shadow:   var(--shadow-glow);
+}
+
+/* ── Barra de estado inferior del mapa ── */
+.sate-map-status {
+  position:   absolute;
+  bottom:     0;
+  left:       0;
+  right:      0;
+  z-index:    var(--z-controls);
+  background: rgba(14, 17, 23, 0.85);
+  backdrop-filter: blur(4px);
+  border-top: 1px solid var(--color-border);
+  display:    flex;
+  gap:        var(--space-4);
+  padding:    var(--space-1) var(--space-4);
+  font-family: var(--font-mono);
+  font-size:   var(--text-xs);
+  color:       var(--color-text-muted);
+}
+
+/* ── Overrides Leaflet ── */
+.leaflet-container {
+  background: var(--color-bg) !important;
+  font-family: var(--font-body) !important;
+}
+
+.leaflet-popup-content-wrapper {
+  background:    var(--color-bg-surface) !important;
+  border:        1px solid var(--color-border) !important;
+  border-radius: var(--radius-md) !important;
+  box-shadow:    var(--shadow-md) !important;
+  color:         var(--color-text) !important;
+}
+
+.leaflet-popup-tip {
+  background: var(--color-bg-surface) !important;
+}
+
+.leaflet-control-zoom {
+  border:     1px solid var(--color-border) !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+
+.leaflet-control-zoom a {
+  background-color: var(--color-bg-surface) !important;
+  color:            var(--color-text-muted) !important;
+  border-color:     var(--color-border) !important;
+}
+
+.leaflet-control-zoom a:hover {
+  background-color: var(--color-bg-hover) !important;
+  color:            var(--color-text) !important;
+}
+
+/* ── Layer switcher ── */
+.sate-layer-switcher {
+  display:  grid;
+  grid-template-columns: 1fr 1fr;
+  gap:      var(--space-1);
+}
+
+.sate-layer-btn {
+  padding:      var(--space-1) var(--space-2);
+  background:   var(--color-bg);
+  border:       1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color:        var(--color-text-muted);
+  cursor:       pointer;
+  font-size:    var(--text-xs);
+  font-family:  var(--font-body);
+  text-align:   center;
+  transition:   all var(--transition-fast);
+}
+
+.sate-layer-btn:hover {
+  border-color: var(--color-primary-light);
+  color:        var(--color-text);
+}
+
+.sate-layer-btn--active {
+  background:   var(--color-primary-alpha);
+  border-color: var(--color-primary);
+  color:        var(--color-primary-light);
+}

@@ -1,0 +1,122 @@
+/* ============================================================
+   SATE-CSS-01 | TEMA Y TOKENS DE DISEÑO
+   Variables globales: colores, tipografía, espaciado, sombras.
+   Todo el sistema visual parte de aquí.
+   SATE v2.0 | JIC 2026
+   ============================================================ */
+
+:root {
+  /* ── Paleta principal ── */
+  --color-primary:        #0F52BA;   /* Azul institucional */
+  --color-primary-dark:   #0A3D8F;
+  --color-primary-light:  #4A7FD4;
+  --color-primary-alpha:  rgba(15, 82, 186, 0.12);
+
+  --color-secondary:      #1A6B3A;   /* Verde ambiental */
+  --color-secondary-light:#2E9955;
+
+  --color-accent:         #E63946;   /* Rojo alerta */
+  --color-accent-warn:    #F4A261;   /* Naranja advertencia */
+  --color-accent-ok:      #2DC653;   /* Verde OK */
+
+  /* ── Neutros ── */
+  --color-bg:             #0E1117;   /* Fondo oscuro principal */
+  --color-bg-surface:     #161B27;   /* Superficie elevada */
+  --color-bg-hover:       #1E2535;
+  --color-border:         #2A3348;
+  --color-border-light:   #3A4560;
+
+  --color-text:           #E8EDF5;   /* Texto principal */
+  --color-text-muted:     #8A96B0;   /* Texto secundario */
+  --color-text-dim:       #4A5568;   /* Texto muy apagado */
+
+  /* ── Tipografía ── */
+  --font-display:   'Fraunces', Georgia, serif;         /* Títulos */
+  --font-body:      'DM Sans', system-ui, sans-serif;   /* Cuerpo */
+  --font-mono:      'Space Mono', 'Courier New', mono;  /* Datos técnicos */
+
+  --text-xs:   0.6875rem;   /* 11px */
+  --text-sm:   0.8125rem;   /* 13px */
+  --text-base: 0.9375rem;   /* 15px */
+  --text-lg:   1.0625rem;   /* 17px */
+  --text-xl:   1.25rem;     /* 20px */
+  --text-2xl:  1.5rem;      /* 24px */
+
+  --leading-tight:  1.25;
+  --leading-normal: 1.5;
+  --leading-loose:  1.75;
+
+  /* ── Espaciado (escala 4px) ── */
+  --space-1:   0.25rem;    /* 4px */
+  --space-2:   0.5rem;     /* 8px */
+  --space-3:   0.75rem;    /* 12px */
+  --space-4:   1rem;       /* 16px */
+  --space-5:   1.25rem;    /* 20px */
+  --space-6:   1.5rem;     /* 24px */
+  --space-8:   2rem;       /* 32px */
+  --space-10:  2.5rem;     /* 40px */
+
+  /* ── Bordes y radios ── */
+  --radius-sm:  4px;
+  --radius-md:  8px;
+  --radius-lg:  12px;
+  --radius-xl:  16px;
+
+  /* ── Sombras ── */
+  --shadow-sm:  0 1px 3px rgba(0,0,0,0.4);
+  --shadow-md:  0 4px 12px rgba(0,0,0,0.5);
+  --shadow-lg:  0 8px 24px rgba(0,0,0,0.6);
+  --shadow-glow:0 0 20px rgba(15, 82, 186, 0.3);
+
+  /* ── Transiciones ── */
+  --transition-fast:   150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow:   400ms ease;
+
+  /* ── Z-index ── */
+  --z-map:      1;
+  --z-controls: 10;
+  --z-sidebar:  20;
+  --z-header:   30;
+  --z-modal:    100;
+  --z-toast:    200;
+}
+
+/* ── Reset mínimo ── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden;   /* El mapa ocupa 100vh */
+}
+
+body {
+  font-family:      var(--font-body);
+  font-size:        var(--text-base);
+  line-height:      var(--leading-normal);
+  color:            var(--color-text);
+  background-color: var(--color-bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Tipografía base ── */
+h1, h2, h3, h4 {
+  font-family:  var(--font-display);
+  line-height:  var(--leading-tight);
+  font-weight:  300;
+}
+
+code, .mono {
+  font-family: var(--font-mono);
+  font-size:   var(--text-sm);
+}
+
+/* ── Scrollbar personalizado ── */
+::-webkit-scrollbar        { width: 5px; }
+::-webkit-scrollbar-track  { background: var(--color-bg); }
+::-webkit-scrollbar-thumb  { background: var(--color-border-light); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-primary-light); }
