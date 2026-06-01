@@ -1691,6 +1691,131 @@
 
         /* Sidebar colapsable — posición relativa para el botón absoluto */
         #sl { position: relative; }
+
+        /* ═══════════════════════════════════════════
+           RESPONSIVE MÓVIL — DEMO JIC 2026
+           Target: portrait 360-430px, landscape 600+
+        ═══════════════════════════════════════════ */
+        @media (max-width: 768px) {
+
+            /* Variables compactas */
+            :root {
+                --pw: 280px;
+                --hh: 44px;
+                --sh: 22px;
+            }
+
+            /* Header — ocultar logo subtitle, compactar */
+            .logo-s { display: none; }
+            .logo-a { font-size: 18px; letter-spacing: 1px; }
+            #hdr-logo { min-width: unset; padding-right: 8px; margin-right: 6px; }
+
+            /* Solo mostrar tabs visibles, más pequeños */
+            .htab { padding: 0 8px; font-size: 8px; letter-spacing: 0.5px; }
+            .theme-sel { display: none; }
+            .st-cluster { display: none; }
+
+            /* Status bar — condensar */
+            #sb { font-size: 7px; overflow-x: auto; flex-wrap: nowrap; }
+            .sbi { padding: 0 5px; }
+
+            /* APP: sidebar oculto por defecto en móvil */
+            #sl {
+                display: none;
+                width: var(--pw);
+                max-width: 85vw;
+                position: fixed;
+                top: calc(var(--hh) + var(--sh));
+                bottom: 0;
+                left: 0;
+                z-index: 800;
+                box-shadow: 4px 0 16px rgba(0,0,0,0.35);
+                overflow-y: auto;
+            }
+
+            /* Botón toggle — siempre visible, reposicionado */
+            #btn-toggle-sidebar {
+                position: fixed !important;
+                top: calc(var(--hh) + var(--sh) + 12px) !important;
+                left: 0 !important;
+                right: unset !important;
+                transform: none !important;
+                border-radius: 0 6px 6px 0 !important;
+                padding: 10px 7px !important;
+                font-size: 16px !important;
+                z-index: 850 !important;
+            }
+
+            /* Mapa ocupa toda la pantalla */
+            #mv { margin-left: 0 !important; }
+            #mw { width: 100%; }
+
+            /* Controles del mapa — más grandes para touch */
+            .mtb { width: 36px; height: 36px; font-size: 16px; }
+            #mt { top: 12px; left: 40px; } /* desplazado para no solapar toggle */
+
+            /* Basemap picker — más compacto */
+            #bmp { font-size: 10px; }
+            .bmo { padding: 6px 10px; font-size: 10px; }
+
+            /* Modal PDF — full screen en móvil */
+            .mo { align-items: flex-start; padding: 0; }
+            .mb {
+                width: 100vw !important;
+                max-width: 100vw !important;
+                max-height: 100vh !important;
+                border-radius: 0 !important;
+                height: 100vh;
+            }
+            .mbody { padding: 6px; }
+
+            /* Doc PDF escala para caber en pantalla */
+            #doc-pdf {
+                width: 100% !important;
+                transform-origin: top left;
+            }
+            .pp {
+                width: 100% !important;
+                min-height: unset !important;
+                padding: 8mm 8mm 20mm 8mm !important;
+            }
+
+            /* Resultados análisis en sidebar — más compactos */
+            .mv, .mu { font-size: 10px; }
+            .mr { padding: 4px 0; }
+            .acb { padding: 6px 8px; }
+
+            /* Tabla derrotero — ya tiene overflow-x:auto */
+            .dt { font-size: 7.5px; }
+
+            /* Toast — arriba en móvil para no tapar controles */
+            #toast {
+                bottom: unset;
+                top: calc(var(--hh) + var(--sh) + 8px);
+                right: 8px;
+                left: 8px;
+                max-width: unset;
+            }
+
+            /* Search overlay */
+            .sbox { width: calc(100vw - 20px); }
+
+            /* Vistas no-mapa (Reservas, Normativa) */
+            #app [data-view].active {
+                padding: 0;
+            }
+            .vs { padding: 10px; }
+            .vt { font-size: 18px; }
+            .kg4 { grid-template-columns: 1fr 1fr; gap: 6px; }
+            .kg2 { grid-template-columns: 1fr; }
+        }
+
+        /* Landscape móvil — sidebar más angosto */
+        @media (max-width: 768px) and (orientation: landscape) {
+            :root { --hh: 38px; --sh: 18px; }
+            #sl { max-width: 60vw; }
+            .htab { font-size: 7.5px; padding: 0 6px; }
+        }
     </style>
 </head>
 
@@ -2995,6 +3120,13 @@
             mapObj.on('moveend', () => updateGrid());
             mapObj.on('click', handleClick);
             SEC.log('MAP', 'Mapa inicializado · CARTO Dark · Panamá bounds');
+            // Auto-colapsar sidebar en móvil
+            if (window.innerWidth <= 768) {
+                const sb = document.getElementById('sl');
+                const btn = document.getElementById('btn-toggle-sidebar');
+                if (sb) sb.style.display = 'none';
+                if (btn) btn.textContent = '▶';
+            }
         }
 
         // ── COORDINATE GRID OVERLAY ──
@@ -3603,7 +3735,10 @@
           const vis = sb.style.display !== 'none';
           sb.style.display = vis ? 'none' : '';
           btn.textContent  = vis ? '▶' : '◀';
-          btn.style.right  = vis ? '-16px' : '-16px';
+          // En desktop el botón es absoluto dentro del sidebar
+          if (window.innerWidth > 768) {
+              btn.style.right = vis ? '-16px' : '-16px';
+          }
           if (typeof mapObj !== 'undefined') mapObj.invalidateSize();
         }
     </script>
