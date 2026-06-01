@@ -1,0 +1,6 @@
+data/
+*.log
+sate_audit.log
+credenciales_arcweb.json
+__pycache__/
+.env

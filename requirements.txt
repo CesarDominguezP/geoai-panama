@@ -1,0 +1,13 @@
+flask
+flask-cors
+flask-limiter
+pyproj
+shapely
+geopandas
+numpy
+pandas
+reportlab
+requests
+pydantic
+earthengine-api
+scikit-learn
