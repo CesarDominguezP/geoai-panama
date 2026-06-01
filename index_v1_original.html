@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>S.A.T.E. v2.0 — Sistema de Auditoría Territorial Especializada</title>
+  <meta name="description" content="Plataforma geoespacial para análisis territorial, ingeniería civil y gestión ambiental. JIC 2026, República de Panamá." />
+
+  <!-- ============================================================
+       SATE INDEX — MAPA DE SECCIONES (index.html)
+       Generado: 2026-05-31 | SATE v2.0
+       ============================================================
+       SATE-H01 | DEPENDENCIAS EXTERNAS (CDN)          ~línea 25
+       SATE-H02 | HOJAS DE ESTILO PROPIAS              ~línea 50
+       SATE-H03 | ESTRUCTURA HTML PRINCIPAL            ~línea 60
+         SATE-H03a | SIDEBAR — PANEL DE CONTROL        ~línea 75
+         SATE-H03b | MAPA PRINCIPAL                    ~línea 160
+         SATE-H03c | PANEL DE RESULTADOS               ~línea 170
+         SATE-H03d | MODAL FICHA TÉCNICA               ~línea 185
+         SATE-H03e | PANEL FUTURAS MEJORAS             ~línea 200
+       SATE-H04 | SCRIPTS PROPIOS (módulos JS)         ~línea 220
+       ============================================================ -->
+
+  <!-- ============================================================
+       SATE-H01 | DEPENDENCIAS EXTERNAS (CDN)
+       Librerías de terceros — no modificar versiones sin validar
+       ============================================================ -->
+
+  <!-- Leaflet 1.9.4 — Motor cartográfico -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!-- Leaflet Draw — Herramientas de dibujo de polígonos -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
+
+  <!-- Turf.js 6.5.0 — Análisis geoespacial en navegador -->
+  <script src="https://unpkg.com/@turf/turf@6.5.0/turf.min.js"></script>
+
+  <!-- Proj4js 2.9.0 — Transformación de coordenadas UTM ↔ WGS84 -->
+  <script src="https://unpkg.com/proj4@2.9.0/dist/proj4.js"></script>
+
+  <!-- Chart.js 4.4.1 — Gráficos de resultados -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+  <!-- jsPDF 2.5.1 + html2canvas 1.4.1 — Exportación PDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+  <!-- Papa Parse 5.4.1 — Lectura de CSV -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&family=Fraunces:ital,wght@0,300;0,600;1,300&display=swap" rel="stylesheet" />
+
+  <!-- ============================================================
+       SATE-H02 | HOJAS DE ESTILO PROPIAS
+       Orden de carga obligatorio: theme → layout → map → components
+       ============================================================ -->
+  <link rel="stylesheet" href="css/theme.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+  <link rel="stylesheet" href="css/map.css" />
+  <link rel="stylesheet" href="css/components.css" />
+</head>
+
+<body>
+
+  <!-- ============================================================
+       SATE-H03 | ESTRUCTURA HTML PRINCIPAL
+       Layout: sidebar izquierdo fijo + mapa principal + panel resultados
+       ============================================================ -->
+
+  <!-- Barra superior -->
+  <header class="sate-header">
+    <div class="sate-header__brand">
+      <span class="sate-header__logo">S.A.T.E.</span>
+      <span class="sate-header__version">v2.0</span>
+      <span class="sate-header__tagline">Sistema de Auditoría Territorial Especializada</span>
+    </div>
+    <div class="sate-header__meta">
+      <span id="hdr-coordinates" class="sate-header__coords">— , —</span>
+      <span class="sate-header__flag">🇵🇦 JIC 2026</span>
+    </div>
+  </header>
+
+  <!-- Contenedor principal -->
+  <main class="sate-main">
+
+    <!-- ============================================================
+         SATE-H03a | SIDEBAR — PANEL DE CONTROL
+         Pestañas: Polígono | Civil | Ambiental | Monitor
+         ============================================================ -->
+    <aside class="sate-sidebar" id="sidebar">
+
+      <!-- Tabs de navegación -->
+      <nav class="sate-tabs" role="tablist">
+        <button class="sate-tab sate-tab--active" data-tab="polygon" role="tab">
+          <span class="sate-tab__icon">⬡</span>
+          <span class="sate-tab__label">Polígono</span>
+        </button>
+        <button class="sate-tab" data-tab="civil" role="tab">
+          <span class="sate-tab__icon">⚙</span>
+          <span class="sate-tab__label">Civil</span>
+        </button>
+        <button class="sate-tab" data-tab="environment" role="tab">
+          <span class="sate-tab__icon">◉</span>
+          <span class="sate-tab__label">Ambiental</span>
+        </button>
+        <button class="sate-tab" data-tab="monitor" role="tab">
+          <span class="sate-tab__icon">◈</span>
+          <span class="sate-tab__label">Monitor</span>
+        </button>
+      </nav>
+
+      <!-- ── Tab: Polígono ── -->
+      <section class="sate-panel" id="panel-polygon" data-panel="polygon">
+        <h2 class="sate-panel__title">Definir Área de Estudio</h2>
+
+        <!-- Capas del mapa -->
+        <div class="sate-group">
+          <label class="sate-label">Capa base</label>
+          <div class="sate-layer-switcher" id="layer-switcher">
+            <button class="sate-layer-btn sate-layer-btn--active" data-layer="satellite">Satélite</button>
+            <button class="sate-layer-btn" data-layer="topo">Topográfico</button>
+            <button class="sate-layer-btn" data-layer="streets">Calles</button>
+            <button class="sate-layer-btn" data-layer="hybrid">Híbrido</button>
+          </div>
+        </div>
+
+        <!-- Herramientas de dibujo -->
+        <div class="sate-group">
+          <label class="sate-label">Herramientas</label>
+          <div class="sate-tool-row">
+            <button class="sate-btn sate-btn--primary" id="btn-draw-polygon" onclick="startDrawPolygon()">
+              Dibujar polígono
+            </button>
+            <button class="sate-btn sate-btn--ghost" id="btn-clear" onclick="clearPolygon()">
+              Limpiar
+            </button>
+          </div>
+        </div>
+
+        <!-- Entrada manual de coordenadas UTM -->
+        <div class="sate-group">
+          <label class="sate-label">Coordenadas UTM (Zona 17N)</label>
+          <div class="sate-coords-input" id="coords-list">
+            <!-- Los inputs se generan dinámicamente desde polygon.js -->
+          </div>
+          <div class="sate-tool-row">
+            <button class="sate-btn sate-btn--ghost" onclick="addCoordRow()">+ Punto</button>
+            <button class="sate-btn sate-btn--ghost" onclick="buildPolygonFromCoords()">Aplicar</button>
+          </div>
+        </div>
+
+        <!-- Carga de archivo -->
+        <div class="sate-group">
+          <label class="sate-label">Importar CSV / GeoJSON / KML</label>
+          <input type="file" id="file-polygon" accept=".csv,.geojson,.kml"
+                 class="sate-file-input" onchange="loadPolygonFile(event)" />
+          <p class="sate-hint">Máximo 5 MB. CSV: columnas Este, Norte (UTM)</p>
+        </div>
+
+        <!-- Resumen del polígono activo -->
+        <div class="sate-result-card" id="polygon-summary" style="display:none">
+          <h3 class="sate-result-card__title">Polígono activo</h3>
+          <dl class="sate-dl">
+            <dt>Área</dt>         <dd id="poly-area">—</dd>
+            <dt>Perímetro</dt>    <dd id="poly-perimeter">—</dd>
+            <dt>Vértices</dt>     <dd id="poly-vertices">—</dd>
+            <dt>Centroide</dt>    <dd id="poly-centroid">—</dd>
+          </dl>
+        </div>
+      </section>
+
+      <!-- ── Tab: Civil ── -->
+      <section class="sate-panel sate-panel--hidden" id="panel-civil" data-panel="civil">
+        <h2 class="sate-panel__title">Análisis de Ingeniería Civil</h2>
+
+        <div class="sate-group">
+          <label class="sate-label">Análisis disponibles</label>
+          <div class="sate-check-list">
+            <label class="sate-check"><input type="checkbox" id="chk-geotec" checked /> Riesgo geotécnico</label>
+            <label class="sate-check"><input type="checkbox" id="chk-slope" checked /> Pendientes del terreno</label>
+            <label class="sate-check"><input type="checkbox" id="chk-cutfill" checked /> Corte y relleno estimado</label>
+            <label class="sate-check"><input type="checkbox" id="chk-derrotero" checked /> Derrotero UTM</label>
+          </div>
+        </div>
+
+        <button class="sate-btn sate-btn--primary sate-btn--full" id="btn-run-civil"
+                onclick="runCivilAnalysis()">
+          Ejecutar análisis civil
+        </button>
+
+        <div class="sate-result-card sate-panel--hidden" id="civil-results">
+          <!-- Resultados inyectados por analysis.js -->
+        </div>
+      </section>
+
+      <!-- ── Tab: Ambiental ── -->
+      <section class="sate-panel sate-panel--hidden" id="panel-environment" data-panel="environment">
+        <h2 class="sate-panel__title">Análisis Ambiental</h2>
+
+        <div class="sate-group">
+          <label class="sate-label">Capas ambientales</label>
+          <div class="sate-check-list">
+            <label class="sate-check"><input type="checkbox" id="chk-sinap" checked /> Zonas SINAP</label>
+            <label class="sate-check"><input type="checkbox" id="chk-buffer" checked /> Zonas de amortiguamiento</label>
+            <label class="sate-check"><input type="checkbox" id="chk-wetlands" /> Humedales Ramsar</label>
+            <label class="sate-check"><input type="checkbox" id="chk-forestry" /> Cobertura forestal</label>
+          </div>
+        </div>
+
+        <button class="sate-btn sate-btn--primary sate-btn--full" id="btn-run-env"
+                onclick="runEnvironmentAnalysis()">
+          Evaluar impacto ambiental
+        </button>
+
+        <div class="sate-result-card sate-panel--hidden" id="env-results">
+          <!-- Resultados inyectados por environment.js -->
+        </div>
+      </section>
+
+      <!-- ── Tab: Monitor ── -->
+      <section class="sate-panel sate-panel--hidden" id="panel-monitor" data-panel="monitor">
+        <h2 class="sate-panel__title">Estación de Monitoreo</h2>
+
+        <div class="sate-group">
+          <p class="sate-hint">
+            Activar estación para el polígono activo. Actualización cada 12 horas.
+          </p>
+          <button class="sate-btn sate-btn--primary sate-btn--full" id="btn-activate-station"
+                  onclick="activateMonitorStation()">
+            Activar estación
+          </button>
+        </div>
+
+        <div id="monitor-dashboard" style="display:none">
+          <div class="sate-result-card">
+            <h3 class="sate-result-card__title">Condiciones actuales</h3>
+            <dl class="sate-dl">
+              <dt>Temperatura</dt>   <dd id="mon-temp">—</dd>
+              <dt>Viento</dt>        <dd id="mon-wind">—</dd>
+              <dt>Precipitación</dt> <dd id="mon-precip">—</dd>
+              <dt>Última lectura</dt><dd id="mon-last">—</dd>
+              <dt>Próxima lectura</dt><dd id="mon-next">—</dd>
+            </dl>
+          </div>
+          <canvas id="monitor-chart" height="120"></canvas>
+        </div>
+      </section>
+
+    </aside><!-- /sidebar -->
+
+    <!-- ============================================================
+         SATE-H03b | MAPA PRINCIPAL
+         Contenedor Leaflet — no agregar elementos hijo directamente
+         ============================================================ -->
+    <div class="sate-map-container">
+      <div id="map"></div>
+
+      <!-- Controles flotantes sobre el mapa -->
+      <div class="sate-map-controls">
+        <button class="sate-map-btn" title="Centrar en Panamá" onclick="centerPanama()">⌂</button>
+        <button class="sate-map-btn" title="Zoom al polígono" onclick="zoomToPolygon()">⊡</button>
+        <button class="sate-map-btn" title="Escala" id="btn-scale">⊞</button>
+      </div>
+
+      <!-- Barra de estado inferior del mapa -->
+      <div class="sate-map-status">
+        <span id="map-zoom">Zoom: —</span>
+        <span id="map-crs">UTM 17N · WGS84</span>
+        <span id="map-cursor">—</span>
+      </div>
+    </div>
+
+    <!-- ============================================================
+         SATE-H03c | PANEL DE RESULTADOS
+         Se expande cuando hay análisis ejecutado
+         ============================================================ -->
+    <aside class="sate-results-panel" id="results-panel" style="display:none">
+      <div class="sate-results-panel__header">
+        <h2>Resultados</h2>
+        <button onclick="closeResultsPanel()">✕</button>
+      </div>
+      <div id="results-content">
+        <!-- Inyectado por analysis.js / environment.js -->
+      </div>
+      <div class="sate-results-panel__actions">
+        <button class="sate-btn sate-btn--primary" onclick="generatePDF()">
+          Generar ficha técnica PDF
+        </button>
+      </div>
+    </aside>
+
+    <!-- ============================================================
+       SATE-H03f | DOC-PDF — Páginas de la ficha técnica
+       Oculto en pantalla, capturado por html2canvas para PDF.
+       Estrategia: .pp (A4) → html2canvas x página → jsPDF
+       ============================================================ -->
+  <div id="doc-pdf" style="position:absolute;left:-9999px;top:0;z-index:-1;">
+
+    <!-- P1: PORTADA -->
+    <div class="pp" id="pp1">
+      <div class="pph">
+        <div class="pph-l">
+          <div class="ppt">S.A.T.E. — Sistema de Auditoría Territorial Especializada</div>
+          <div class="pps">República de Panamá · WGS84 UTM 17N · IGNTG · JIC 2026</div>
+        </div>
+        <div class="pph-r">EXPEDIENTE PERICIAL<br>
+          <span id="pdf-id" style="font-size:9pt;color:#1c4e8a;font-weight:bold">SATE-2026-XXXX</span>
+        </div>
+      </div>
+      <div class="pst">Fascículo I — Portada y Ubicación Espacial</div>
+      <canvas id="pdf-c-portada" class="pmc" style="height:100mm;background:#1a1e2a"></canvas>
+      <table class="ptbl" style="margin-top:10px">
+        <tr>
+          <td class="lbl">Código de Expediente</td><td id="p-cod">—</td>
+          <td class="lbl">Fecha / Hora</td><td id="p-fch">—</td>
+        </tr>
+        <tr>
+          <td class="lbl">Sistema de Referencia</td>
+          <td>WGS84 EPSG:4326 / UTM 17N EPSG:32617</td>
+          <td class="lbl">Vértices</td><td id="p-vt">—</td>
+        </tr>
+        <tr>
+          <td class="lbl">Área Total</td><td id="p-ar">—</td>
+          <td class="lbl">Perímetro</td><td id="p-pe">—</td>
+        </tr>
+        <tr>
+          <td class="lbl">Zona Protegida SINAP</td>
+          <td id="p-zp" colspan="3">Verificando…</td>
+        </tr>
+      </table>
+      <div class="pnotice">
+        <strong>⚠ DESLINDE DE RESPONSABILIDAD:</strong> Este documento es de carácter referencial
+        académico generado por S.A.T.E. v2.0 en el marco de la JIC 2026, República de Panamá.
+        No reemplaza el criterio técnico de profesionales idóneos (ingenieros, topógrafos,
+        ambientalistas, abogados). El usuario asume toda responsabilidad sobre el uso de esta
+        información. Los análisis civiles y ambientales son simulaciones documentadas —
+        ver nota metodológica en cada fascículo.
+      </div>
+      <div class="pcode" id="p-hash">HASH CUSTODIAL SHA-256: —</div>
+      <div class="pft">
+        <div class="pft-t">S.A.T.E. v2.0 · JIC 2026 · Rep. de Panamá</div>
+        <div class="pft-w">DOCUMENTO REFERENCIAL — NO REEMPLAZA ESTUDIO DE PROFESIONAL IDÓNEO</div>
+        <div class="pft-p">PÁG 1/5</div>
+      </div>
+    </div>
+
+    <!-- P2: GEODÉSICO -->
+    <div class="pp" id="pp2">
+      <div class="pph">
+        <div class="pph-l">
+          <div class="ppt">Fascículo II — Geodésico</div>
+          <div class="pps">Derrotero, Coordenadas UTM y Azimut de Linderos</div>
+        </div>
+        <div class="pph-r">EXP: <span id="pdf-id2">—</span></div>
+      </div>
+      <canvas id="pdf-c-geo" class="pmc" style="height:85mm;background:#1a1e2a"></canvas>
+      <div class="pst" style="margin-top:8px">Tabla de Derrotero Geodésico — UTM Zona 17N (EPSG:32617)</div>
+      <table class="ptbl" id="pdf-dero">
+        <thead>
+          <tr>
+            <th>Vért.</th><th>Lat (°)</th><th>Lon (°)</th>
+            <th>Este UTM (m)</th><th>Norte UTM (m)</th>
+            <th>Lado</th><th>Rumbo</th><th>Dist.(m)</th>
+          </tr>
+        </thead>
+        <tbody id="pdf-dero-body"></tbody>
+      </table>
+      <table class="ptbl">
+        <tr>
+          <td class="lbl">Área Total</td><td id="p-ar2">—</td>
+          <td class="lbl">Perímetro Total</td><td id="p-pe2">—</td>
+        </tr>
+        <tr>
+          <td class="lbl">Sistema de Referencia</td>
+          <td colspan="3">WGS84 EPSG:4326 · UTM Zona 17N EPSG:32617 · Decreto IGNTG 23/2009</td>
+        </tr>
+      </table>
+      <div class="pft">
+        <div class="pft-t">S.A.T.E. v2.0 · JIC 2026</div>
+        <div class="pft-w">DOCUMENTO REFERENCIAL — NO REEMPLAZA ESTUDIO DE PROFESIONAL IDÓNEO</div>
+        <div class="pft-p">PÁG 2/5</div>
+      </div>
+    </div>
+
+    <!-- P3: AMBIENTAL -->
+    <div class="pp" id="pp3">
+      <div class="pph">
+        <div class="pph-l">
+          <div class="ppt">Fascículo III — Ambiental</div>
+          <div class="pps">Zonas SINAP, Humedales Ramsar, Cobertura Forestal</div>
+        </div>
+        <div class="pph-r">EXP: <span id="pdf-id3">—</span></div>
+      </div>
+      <canvas id="pdf-c-sat" class="pmc" style="height:85mm;background:#1a1e2a"></canvas>
+      <div class="pst" style="margin-top:8px">A. Condiciones Ambientales</div>
+      <table class="ptbl">
+        <tr>
+          <td class="lbl">Zona Protegida SINAP</td><td id="p-sinap-val">—</td>
+          <td class="lbl">Área Protegida Cercana</td><td id="p-apc">—</td>
+        </tr>
+        <tr>
+          <td class="lbl">Zona de Amortiguamiento</td><td id="p-buffer-val">—</td>
+          <td class="lbl">Humedal Ramsar cercano</td><td id="p-ramsar-val">—</td>
+        </tr>
+        <tr>
+          <td class="lbl">Cobertura Forestal Est.</td><td id="p-forest-val">—</td>
+          <td class="lbl">Nivel Restricción General</td><td id="p-nivel-val">—</td>
+        </tr>
+      </table>
+      <div class="pst">B. Infraestructura y Servicios</div>
+      <table class="ptbl" id="p-infra-tbl">
+        <tr>
+          <td class="lbl">Red Vial Principal</td><td id="p-vial">Verificar en MIVIOT / MOP</td>
+          <td class="lbl">Sistema Acueducto</td><td id="p-agua">Verificar en IDAAN</td>
+        </tr>
+        <tr>
+          <td class="lbl">Sistema Eléctrico</td><td id="p-elec">Verificar en ETESA</td>
+          <td class="lbl">Normativa Base</td><td>Ley 41/1998 · Ley 1/1990</td>
+        </tr>
+      </table>
+      <div class="pft">
+        <div class="pft-t">S.A.T.E. v2.0 · JIC 2026</div>
+        <div class="pft-w">DOCUMENTO REFERENCIAL — NO REEMPLAZA ESTUDIO DE PROFESIONAL IDÓNEO</div>
+        <div class="pft-p">PÁG 3/5</div>
+      </div>
+    </div>
+
+    <!-- P4: CIVIL -->
+    <div class="pp" id="pp4">
+      <div class="pph">
+        <div class="pph-l">
+          <div class="ppt">Fascículo IV — Civil y Topográfico</div>
+          <div class="pps">Pendientes, Geotecnia y Movimiento de Tierras</div>
+        </div>
+        <div class="pph-r">EXP: <span id="pdf-id4">—</span></div>
+      </div>
+      <canvas id="pdf-c-topo" class="pmc" style="height:85mm;background:#1a1e2a"></canvas>
+      <div class="pst" style="margin-top:8px">Análisis de Ingeniería Civil</div>
+      <table class="ptbl">
+        <tr>
+          <td class="lbl">Elevación Promedio Est.</td><td id="p-elev">—</td>
+          <td class="lbl">Desnivel Máximo Est.</td><td id="p-desn">—</td>
+        </tr>
+        <tr>
+          <td class="lbl">Pendiente Media</td><td id="p-pend">—</td>
+          <td class="lbl">Vol. Corte Estimado</td><td id="p-vol">—</td>
+        </tr>
+        <tr>
+          <td class="lbl">Req. Muro Contención</td><td id="p-muro">—</td>
+          <td class="lbl">Riesgo Geotécnico</td><td id="p-riesg">—</td>
+        </tr>
+      </table>
+      <div class="pst">Dictamen Pericial Preliminar</div>
+      <div style="background:#f5f7fa;border:1px solid #d0d8e8;border-radius:3px;padding:9px;font-size:8.5pt;line-height:1.6" id="p-dict">—</div>
+      <div class="pft">
+        <div class="pft-t">S.A.T.E. v2.0 · JIC 2026</div>
+        <div class="pft-w">DOCUMENTO REFERENCIAL — NO REEMPLAZA ESTUDIO DE PROFESIONAL IDÓNEO</div>
+        <div class="pft-p">PÁG 4/5</div>
+      </div>
+    </div>
+
+    <!-- P5: NORMATIVO -->
+    <div class="pp" id="pp5">
+      <div class="pph">
+        <div class="pph-l">
+          <div class="ppt">Fascículo V — Normativo y Legal</div>
+          <div class="pps">Marco Regulatorio Aplicable · República de Panamá</div>
+        </div>
+        <div class="pph-r">EXP: <span id="pdf-id5">—</span></div>
+      </div>
+      <div class="pst">Normativa Aplicable</div>
+      <table class="ptbl">
+        <thead><tr><th>Instrumento Legal</th><th>Descripción</th><th>Relevancia</th></tr></thead>
+        <tr><td>Ley 41/1998</td><td>Ley General de Ambiente · SINAP</td><td id="p-ley41">Alta</td></tr>
+        <tr><td>Ley 51/2008</td><td>Firma Electrónica — validez documental digital</td><td>Aplicable (hash)</td></tr>
+        <tr><td>Ley 81/2019</td><td>Protección de Datos Personales</td><td>Aplicable (sistema)</td></tr>
+        <tr><td>Decreto 23/2009</td><td>Especificaciones Técnicas IGNTG — UTM 17N</td><td>Alta</td></tr>
+        <tr><td>MIVIOT Res. 001-2019</td><td>Pendientes y Muros de Contención</td><td>Alta</td></tr>
+        <tr><td>Ley 1/1990</td><td>Ratificación Convenio Ramsar — Humedales</td><td>Condicional</td></tr>
+      </table>
+      <div class="pst">Matriz de Usos Permitidos (Preliminar)</div>
+      <table class="ptbl">
+        <thead><tr><th>Uso</th><th>Estado</th><th>Condición</th></tr></thead>
+        <tr><td>Residencial baja densidad</td><td style="color:green;font-weight:bold">PERMITIDO</td><td>Sujeto a factibilidad topográfica</td></tr>
+        <tr><td>Uso agroforestal</td><td style="color:green;font-weight:bold">PERMITIDO</td><td>Compatible con cobertura existente</td></tr>
+        <tr><td>Industria pesada</td><td style="color:orange;font-weight:bold">RESTRINGIDO</td><td>Requiere EIA (Res. AG-0333)</td></tr>
+        <tr><td>Urbanización masiva</td><td style="color:orange;font-weight:bold">RESTRINGIDO</td><td>EIA + aprobación MIVIOT</td></tr>
+        <tr id="row-prot" style="display:none">
+          <td>Cualquier intervención</td>
+          <td style="color:red;font-weight:bold">PROHIBIDO SIN PERMISO</td>
+          <td>Zona amortiguamiento · Ley 41/1998</td>
+        </tr>
+      </table>
+      <div class="pst">Fuentes Oficiales para Verificación</div>
+      <table class="ptbl">
+        <tr>
+          <td class="lbl">Planos topográficos</td><td>igntg.gob.pa</td>
+          <td class="lbl">Permisos construcción</td><td>miviot.gob.pa</td>
+        </tr>
+        <tr>
+          <td class="lbl">EIA y ambiente</td><td>miambiente.gob.pa</td>
+          <td class="lbl">Catastro</td><td>anati.gob.pa</td>
+        </tr>
+        <tr>
+          <td class="lbl">Normativa</td><td>gacetaoficial.gob.pa</td>
+          <td class="lbl">Áreas protegidas</td><td>miambiente.gob.pa/sinap</td>
+        </tr>
+      </table>
+      <div class="pft">
+        <div class="pft-t">S.A.T.E. v2.0 · JIC 2026 · Rep. de Panamá</div>
+        <div class="pft-w">DOCUMENTO REFERENCIAL — NO REEMPLAZA ASESORÍA TÉCNICA O LEGAL DE PROFESIONAL IDÓNEO</div>
+        <div class="pft-p">PÁG 5/5</div>
+      </div>
+    </div>
+
+  </div><!-- /#doc-pdf -->
+
+  </main><!-- /sate-main -->
+
+  <!-- ============================================================
+       SATE-H03d | MODAL FICHA TÉCNICA
+       Previsualización antes de exportar PDF
+       ============================================================ -->
+  <div class="sate-modal" id="modal-pdf" style="display:none" role="dialog" aria-modal="true">
+    <div class="sate-modal__backdrop" onclick="closeModal('modal-pdf')"></div>
+    <div class="sate-modal__content">
+      <div class="sate-modal__header">
+        <h2>Ficha Técnica — Vista previa</h2>
+        <button onclick="closeModal('modal-pdf')">✕</button>
+      </div>
+      <div id="pdf-preview">
+        <!-- Renderizado por pdf.js antes de exportar -->
+      </div>
+      <div class="sate-modal__footer">
+        <button class="sate-btn sate-btn--ghost" onclick="closeModal('modal-pdf')">Cancelar</button>
+        <button class="sate-btn sate-btn--primary" onclick="exportPDF()">Descargar PDF</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       SATE-H03e | PANEL FUTURAS MEJORAS
+       Roadmap visible para evaluadores JIC
+       ============================================================ -->
+  <div class="sate-modal" id="modal-roadmap" style="display:none" role="dialog" aria-modal="true">
+    <div class="sate-modal__backdrop" onclick="closeModal('modal-roadmap')"></div>
+    <div class="sate-modal__content sate-modal__content--wide">
+      <div class="sate-modal__header">
+        <h2>Roadmap — Futuras Mejoras</h2>
+        <button onclick="closeModal('modal-roadmap')">✕</button>
+      </div>
+      <div class="sate-roadmap" id="roadmap-content">
+        <!-- Inyectado por config.js — array ROADMAP -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Botón flotante para abrir roadmap -->
+  <button class="sate-fab" onclick="openModal('modal-roadmap')" title="Ver roadmap">
+    ◈ Roadmap
+  </button>
+
+  <!-- ============================================================
+       SATE-H04 | SCRIPTS PROPIOS
+       Orden de carga obligatorio — no reordenar
+       1. config.js   — constantes globales (sin dependencias)
+       2. utils.js    — helpers puros (depende de config)
+       3. map.js      — Leaflet (depende de config)
+       4. polygon.js  — lógica de polígono (depende de map)
+       5. analysis.js — módulo civil (depende de polygon)
+       6. environment.js — módulo ambiental (depende de polygon)
+       7. monitor.js  — estación (depende de polygon)
+       8. pdf.js      — exportación (depende de todos)
+       ============================================================ -->
+  <script src="js/config.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/map.js"></script>
+  <script src="js/polygon.js"></script>
+  <script src="js/analysis.js"></script>
+  <script src="js/environment.js"></script>
+  <script src="js/monitor.js"></script>
+  <script src="js/pdf.js"></script>
+
+</body>
+</html>
