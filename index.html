@@ -1690,7 +1690,6 @@
         }
 
         /* Sidebar colapsable — posición relativa para el botón absoluto */
-        #sl { position: relative; }
 
         /* ═══════════════════════════════════════════
            RESPONSIVE MÓVIL — DEMO JIC 2026
@@ -1733,17 +1732,11 @@
                 overflow-y: auto;
             }
 
-            /* Botón toggle — siempre visible, reposicionado */
+            /* Botón toggle — reposicionar en móvil */
             #btn-toggle-sidebar {
-                position: fixed !important;
-                top: calc(var(--hh) + var(--sh) + 12px) !important;
-                left: 0 !important;
-                right: unset !important;
-                transform: none !important;
-                border-radius: 0 6px 6px 0 !important;
+                top: calc(var(--hh) + var(--sh) + 60px) !important;
                 padding: 10px 7px !important;
                 font-size: 16px !important;
-                z-index: 850 !important;
             }
 
             /* Mapa ocupa toda la pantalla */
@@ -2086,14 +2079,16 @@
                 </div>
 
             </div>
+        </aside>
 
+        <!-- TOGGLE SIDEBAR BTN — independiente del sidebar -->
         <button id="btn-toggle-sidebar"
           onclick="toggleSidebar()"
-          style="position:absolute;top:50%;right:-16px;transform:translateY(-50%);
-                 z-index:200;background:#1c4e8a;color:white;border:none;
+          style="position:fixed;top:50%;left:var(--pw);transform:translateY(-50%);
+                 z-index:1200;background:#1c4e8a;color:white;border:none;
                  border-radius:0 6px 6px 0;padding:12px 5px;cursor:pointer;
-                 font-size:14px;box-shadow:2px 0 6px rgba(0,0,0,0.3);">◀</button>
-        </aside>
+                 font-size:14px;box-shadow:2px 0 6px rgba(0,0,0,0.3);
+                 transition:left 0.2s ease;">◀</button>
 
         <!-- MAP -->
         <div id="mv" class="active">
@@ -3125,7 +3120,7 @@
                 const sb = document.getElementById('sl');
                 const btn = document.getElementById('btn-toggle-sidebar');
                 if (sb) sb.style.display = 'none';
-                if (btn) btn.textContent = '▶';
+                if (btn) { btn.textContent = '▶'; btn.style.left = '0px'; }
             }
         }
 
@@ -3735,10 +3730,7 @@
           const vis = sb.style.display !== 'none';
           sb.style.display = vis ? 'none' : '';
           btn.textContent  = vis ? '▶' : '◀';
-          // En desktop el botón es absoluto dentro del sidebar
-          if (window.innerWidth > 768) {
-              btn.style.right = vis ? '-16px' : '-16px';
-          }
+          btn.style.left   = vis ? '0px' : 'var(--pw)';
           if (typeof mapObj !== 'undefined') mapObj.invalidateSize();
         }
     </script>
